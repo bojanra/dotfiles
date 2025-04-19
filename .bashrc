@@ -121,6 +121,7 @@ alias locate='locate -i'
 alias n=nvim
 
 # bartib - time tracking
+# https://github.com/nikolassv/bartib
 export BARTIB_FILE=~/02_personal/bartib_timetracking.log
 
 _bartib_completions() {

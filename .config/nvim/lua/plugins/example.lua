@@ -12,6 +12,8 @@ return {
   -- add gruvbox
   { "ellisonleao/gruvbox.nvim" },
 
+  -- { "L3MON4D3/LuaSnip", enabled = false, },
+  --
   -- Configure LazyVim to load gruvbox
   {
     "LazyVim/LazyVim",
