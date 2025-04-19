@@ -1,0 +1,57 @@
+[core]
+  whitespace = blank-at-eol,blank-at-eof,tab-in-indent
+  excludesfile = /home/ramsakb/.gitignore
+[user]
+	email = bojan.ramsak@rtvslo.si
+	name = Bojan Ramšak
+[push]
+	default = simple
+[diff]
+	tool = meld
+  guitool = meld
+  algorithm = histogram
+[difftool]
+	prompt = false
+[merge]
+	tool = meld
+  conflictsytle = zdiff3
+[mergetool "meld"]
+#   cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
+[color]
+	ui = auto
+[pull]
+  # Preserve the history of everybody and avoid origin merge commits
+	rebase = true
+[color]
+  branch = auto
+  diff = auto
+  status = auto
+[color "branch"]
+  current = yellow reverse
+  local = yellow
+  remote = green
+[color "diff"]
+  meta = yellow bold
+  frag = magenta bold
+  old = red bold
+  new = green bold
+[color "status"]
+  added = yellow
+  changed = green
+  untracked = cyan
+[log]
+  date = iso8601
+[alias]
+  co = checkout
+  br = branch
+  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+	logg = log --oneline --graph --decorate
+	sta = !git stash push && git stash apply
+[rebase]
+	autoStash = true
+[init]
+	defaultBranch = master
+[column]
+  ui = auto
+[rerere]
+  enabled = true

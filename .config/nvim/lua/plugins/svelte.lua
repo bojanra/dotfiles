@@ -1,0 +1,22 @@
+return {
+  -- {
+  --   "neovim/nvim-lspconfig",
+  --   config = function()
+  --     require("lspconfig").svelte.setup({
+  --       cmd = { "svelteserver", "--stdio" },
+  --       filetypes = { "svelte" },
+  --       settings = {
+  --         svelte = {
+  --           plugin = {
+  --             svelte = {
+  --               compilerWarnings = {
+  --                 ["a11y-*"] = "ignore",
+  --               },
+  --             },
+  --           },
+  --         },
+  --       },
+  --     })
+  --   end,
+  -- },
+}

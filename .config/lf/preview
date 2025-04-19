@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Five arguments are passed to the file, (1) current file name, (2) width, (3) height, (4) horizontal position, and (5)
+# vertical position of preview pane respectively.
+#
+file=$1
+w=$2
+h=$3
+x=$4
+y=$5
+
+# Calculate where the image should be placed on the screen.
+num=$(printf "%0.f\n" "$(echo "$(tput cols) / 2" | bc)")
+numb=$(printf "%0.f\n" "$(echo "$(tput cols) - $num - 1" | bc)")
+numc=$(printf "%0.f\n" "$(echo "$(tput lines) - 2" | bc)")
+
+image() {
+	kitty +kitten icat --silent --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$1"
+}
+
+case "$file" in
+*.tgz | *.tar.gz) tar tzf "$file" ;;
+*.tar.bz2 | *.tbz2) tar tjf "$file" ;;
+*.tar.txz | *.txz) xz --list "$file" ;;
+*.tar) tar tf "$file" ;;
+*.zip | *.jar | *.war | *.ear | *.oxt) unzip -l "$file" ;;
+*.rar) unrar l "$file" ;;
+*.7z) 7z l "$file" ;;
+*.[1-8]) man "$file" | col -b ;;
+*.o) nm "$file" | less ;;
+*.torrent) transmission-show "$file" ;;
+*.iso) iso-info --no-header -l "$file" ;;
+*odt,*.ods,*.odp,*.sxw) odt2txt "$file" ;;
+*.doc) catdoc "$file" ;;
+*.docx) docx2txt "$file" - ;;
+*.csv) cat "$file" | sed s/,/\\n/g ;;
+*.pdf)
+	CACHE=$(mktemp /tmp/thumbcache.XXXXX)
+	pdftoppm -png -f 1 -singlefile "$file" "$CACHE"
+	image "$CACHE.png"
+	exit 1
+	;;
+*.epub)
+	CACHE=$(mktemp /tmp/thumbcache.XXXXX)
+	epub-thumbnailer "$file" "$CACHE" 1024
+	$HOME/.config/lf/image draw "$CACHE" $num 1 $numb $numc
+	exit 1
+	;;
+*.bmp | *.jpg | *.jpeg | *.png | *.xpm)
+	image "$file"
+	exit 1
+	;;
+*.wav | *.mp3 | *.flac | *.m4a | *.wma | *.ape | *.ac3 | *.og[agx] | *.spx | *.opus | *.as[fx] | *.flac) exiftool "$file" ;;
+*.avi | *.mp4 | *.wmv | *.dat | *.3gp | *.ogv | *.mkv | *.mpg | *.mpeg | *.vob | *.fl[icv] | *.m2v | *.mov | *.webm | *.ts | *.mts | *.m4v | *.r[am] | *.qt | *.divx)
+	CACHE=$(mktemp /tmp/thumbcache.XXXXX)
+	ffmpegthumbnailer -i "$file" -o "$CACHE" -s 0
+	image "$CACHE.png"
+	exit 1
+	;;
+*) batcat --color=always --style=plain "$file" ;;
+esac

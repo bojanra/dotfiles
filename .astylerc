@@ -1,0 +1,14 @@
+--style=google
+# --attach-namespaces
+--indent=spaces=2
+--indent-switches
+# --indent-preproc-define
+--indent-col1-comments
+--pad-oper
+--convert-tabs
+--pad-header
+--align-pointer=name
+--align-reference=name
+--add-brackets
+--add-one-line-brackets
+

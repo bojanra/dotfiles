@@ -1,0 +1,367 @@
+  ##      ##
+   #     #  #
+   #     #
+   #    ####
+   #     #
+   #     #
+  ###    #
+
+#* DOC:
+# https://godoc.org/github.com/gokcehan/lf
+set shell sh
+set shellopts '-eu'
+set ifs "\n"
+
+set cleaner ~/.config/lf/clean
+set previewer ~/.config/lf/preview
+set preview true
+set hiddenfiles ".*:*.log"
+
+set ratios 1:2
+set scrolloff 10
+set icons
+set ignorecase true
+# set drawbox true
+# set hidden true
+set scrolloff 10
+set info size:time
+
+# Custom Functions
+cmd open ${{
+    case $(file --mime-type "$f" -bL) in
+        text/*|application/json) $EDITOR "$f";;
+        *) xdg-open "$f" ;;
+    esac
+}}
+
+cmd on-redraw %{{
+    if [ $lf_width -le 80 ]; then
+        lf -remote "send $id set ratios 1:2"
+    elif [ $lf_width -le 160 ]; then
+        lf -remote "send $id set ratios 1:2:3"
+    else
+        lf -remote "send $id set ratios 1:2:3:5"
+    fi
+}}
+
+cmd mkdir ${{
+  printf "Directory Name: "
+  read ans
+  mkdir $ans
+}}
+
+cmd mkfile ${{
+  printf "File Name: "
+  read ans
+  $EDITOR $ans
+}}
+
+cmd chmod ${{
+  printf "Mode Bits: "
+  read ans
+
+  for file in "$fx"
+  do
+    chmod $ans $file
+  done
+
+  lf -remote 'send reload'
+}}
+
+cmd sudomkfile ${{
+  printf "File Name: "
+  read ans
+  sudo $EDITOR $ans
+}}
+
+cmd setwallpaper %cp "$f" ~/.config/wall.png && xwallpaper --zoom "$f"
+
+cmd fzf_jump ${{
+  res="$(find . -maxdepth 4 -not -path "*.git/*" -not -path "*.tidyall*" -not -path "*.npm*" -not -path "*cache*" -not -path "*.mozilla*" -not -path "*.eclipse*" | sk --reverse --header='Jump to location')"
+  if [ -f "$res" ]; then
+    cmd="select"
+  elif [ -d "$res" ]; then
+    cmd="cd"
+  fi
+  lf -remote "send $id $cmd \"$res\""
+}}
+
+cmd fzf_search ${{
+    cmd="rg --column --line-number --no-heading --color=always --smart-case"
+    fzf --ansi --disabled --layout=reverse --header="Search in files" --delimiter=: \
+        --bind="start:reload([ -n {q} ] && $cmd -- {q} || true)" \
+        --bind="change:reload([ -n {q} ] && $cmd -- {q} || true)" \
+        --bind='enter:become(lf -remote "send $id select \"$(printf "%s" {1} | sed '\''s/\\/\\\\/g;s/"/\\"/g'\'')\"")' \
+        --preview 'batcat --style=full --color=always --highlight-line {2} {1}' \
+        --preview-window '~4,+{2}+4/3,<80(up)' \
+        --query "$*"
+        #--preview='cat -- {1}' # Use your favorite previewer here (bat, source-highlight, etc.), for example:
+        # Alternatively you can even use the same previewer you've configured for lf
+        #--preview='~/.config/lf/cleaner; ~/.config/lf/previewer {1} "$FZF_PREVIEW_COLUMNS" "$FZF_PREVIEW_LINES" "$FZF_PREVIEW_LEFT" "$FZF_PREVIEW_TOP"'
+}}
+
+# Archive bindings
+cmd unarchive ${{
+  case "$f" in
+      *.zip) unzip "$f" ;;
+      *.tar.gz) tar -xzvf "$f" ;;
+      *.tar.bz2) tar -xjvf "$f" ;;
+      *.tar) tar -xvf "$f" ;;
+      *) echo "Unsupported format" ;;
+  esac
+}}
+
+cmd zip %zip -r "$f" "$f"
+cmd tar %tar cvf "$f.tar" "$f"
+cmd targz %tar cvzf "$f.tar.gz" "$f"
+cmd tarbz2 %tar cjvf "$f.tar.bz2" "$f"
+
+# Trash cli bindings
+# require apt install trash-cli
+cmd trash ${{
+  files=$(printf "$fx" | tr '\n' ';')
+  while [ "$files" ]; do
+    # extract the substring from start of string up to delimiter.
+    # this is the first "element" of the string.
+    file=${files%%;*}
+
+    trash-put "$(basename "$file")"
+    # if there's only one element left, set `files` to an empty string.
+    # this causes us to exit this `while` loop.
+    # else, we delete the first "element" of the string from files, and move onto the next.
+    if [ "$files" = "$file" ]; then
+      files=''
+    else
+      files="${files#*;}"
+    fi
+  done
+}}
+
+cmd clear_trash %trash-empty
+
+cmd restore_trash ${{
+  trash-restore
+}}
+
+cmd stripspace %stripspace "$f"
+
+cmd bulk-rename ${{
+    old="$(mktemp)"
+    new="$(mktemp)"
+    if [ -n "$fs" ]; then
+        fs="$(basename -a $fs)"
+    else
+        fs="$(ls)"
+    fi
+    printf '%s\n' "$fs" >"$old"
+    printf '%s\n' "$fs" >"$new"
+    $EDITOR "$new"
+    [ "$(wc -l < "$new")" -ne "$(wc -l < "$old")" ] && exit
+    paste "$old" "$new" | while IFS= read -r names; do
+        src="$(printf '%s' "$names" | cut -f1)"
+        dst="$(printf '%s' "$names" | cut -f2)"
+        if [ "$src" = "$dst" ] || [ -e "$dst" ]; then
+            continue
+        fi
+        mv -- "$src" "$dst"
+    done
+    rm -- "$old" "$new"
+    lf -remote "send $id unselect"
+}}
+
+# autorun on directory change
+cmd on-cd &{{
+    # '&' commands run silently in background (which is what we want here),
+    # but are not connected to stdout.
+    # To make sure our escape sequence still reaches stdout we pipe it to /dev/tty
+    printf "\033]0; $(pwd | sed "s|$HOME|~|") - lf\007" > /dev/tty
+}}
+
+# also run at startup
+on-cd
+
+# Warn about nested instances
+%[ $LF_LEVEL -eq 1 ] || echo "Warning: You're in a nested lf instance!"
+
+# requires to have environment variable called LF_BOOKMARK_PATH to an empty folder
+cmd bookmark_jump ${{
+    res="$(cat $LF_BOOKMARK_PATH/$(ls $LF_BOOKMARK_PATH | sk))"
+    lf -remote "send $id cd \"$res\""
+}}
+
+cmd bookmark_create ${{
+    read ans
+    echo $PWD > $LF_BOOKMARK_PATH/$ans
+}}
+
+# allow to change directory on exit - Q
+cmd quit-and-cd &{{
+    pwd > $LF_CD_FILE
+    lf -remote "send $id quit"
+}}
+
+cmd follow-link %{{
+  lf -remote "send $id select \"$(readlink -- "$f" | sed 's/\\/\\\\/g;s/"/\\"/g')\""
+}}
+
+cmd reload-config ${{
+    lf -remote "send $id source ~/.config/lf/lfrc"
+}}
+
+# Key Bindings
+# Remove some defaults
+# map "'"
+# map '"'
+map m
+map o
+map n
+map d
+map c
+map e
+map f
+map t
+map \;
+
+#** sort
+map st :{{
+    set sortby time
+    set info time
+}}
+
+map sr :{{
+    set nopreview
+    set ratios 1:3
+}}
+
+map sp :{{
+    set preview
+    set ratios 1:2
+}}
+
+map sP :{{
+    set preview
+    set ratios 1:1:2
+}}
+
+# File Openers
+# edit config
+map ec $$EDITOR ~/.config/lf/lfrc
+map er reload-config
+map ee $$EDITOR "$f"
+map ol !lazygit "$f"
+
+# Archive Mappings
+map az zip
+map at tar
+map ag targz
+map ab targz
+map au unarchive
+
+# Trash Mappings
+map dd trash
+map tc clear_trash
+map td restore_trash
+
+# Basic Functions
+map . set hidden!
+map DD delete
+map p paste
+map x cut
+map y copy
+map <enter> open
+map mf mkfile
+map mr sudomkfile
+map md mkdir
+map ms $mkscript
+map ch chmod
+map bg setwallpaper
+map br bulk-rename
+map bb bookmark_create
+map bj bookmark_jump
+# map r :rename; cmd-delete-home
+map r :rename;cmd-home
+map R reload
+map C clear
+map + glob-select *
+map U unselect
+map <c-o> $ kill -STOP $PPID  # go to background
+map Q quit-and-cd    # change to current directory on exit
+
+# copy path to clipboard
+map \;c $echo "$f" | xclip -selection clipboard && notify-send 'lf' "path to <i>$(basename "$f")</i> copied to clipboard"
+
+# Movement
+map gD cd ~/Desktop
+map gC cd ~/03_work/02_cherry/01_vm/cherryTool/
+map gL follow-link
+map gs :fzf_search
+map \;j cd ~
+map <c-f> :fzf_jump
+
+# commands
+#  quit                     (default 'q')
+#  up                       (default 'k' and '<up>')
+#  half-up                  (default '<c-u>')
+#  page-up                  (default '<c-b>' and '<pgup>')
+#  scroll-up                (default '<c-y>')
+#  down                     (default 'j' and '<down>')
+#  half-down                (default '<c-d>')
+#  page-down                (default '<c-f>' and '<pgdn>')
+#  scroll-down              (default '<c-e>')
+#  updir                    (default 'h' and '<left>')
+#  open                     (default 'l' and '<right>')
+#  jump-next                (default ']')
+#  jump-prev                (default '[')
+#  top                      (default 'gg' and '<home>')
+#  bottom                   (default 'G' and '<end>')
+#  high                     (default 'H')
+#  middle                   (default 'M')
+#  low                      (default 'L')
+#  toggle
+#  invert                   (default 'v')
+#  invert-below
+#  unselect                 (default 'u')
+#  glob-select
+#  glob-unselect
+#  calcdirsize
+#  clearmaps
+#  copy                     (default 'y')
+#  cut                      (default 'd')
+#  paste                    (default 'p')
+#  clear                    (default 'c')
+#  sync
+#  draw
+#  redraw                   (default '<c-l>')
+#  load
+#  reload                   (default '<c-r>')
+#  echo
+#  echomsg
+#  echoerr
+#  cd
+#  select
+#  delete         (modal)
+#  rename         (modal)   (default 'r')
+#  source
+#  push
+#  read           (modal)   (default ':')
+#  shell          (modal)   (default '$')
+#  shell-pipe     (modal)   (default '%')
+#  shell-wait     (modal)   (default '!')
+#  shell-async    (modal)   (default '&')
+#  find           (modal)   (default 'f')
+#  find-back      (modal)   (default 'F')
+#  find-next                (default ';')
+#  find-prev                (default ',')
+#  search         (modal)   (default '/')
+#  search-back    (modal)   (default '?')
+#  search-next              (default 'n')
+#  search-prev              (default 'N')
+#  filter         (modal)
+#  setfilter
+#  mark-save      (modal)   (default 'm')
+#  mark-load      (modal)   (default "'")
+#  mark-remove    (modal)   (default '"')
+#  tag
+#  tag-toggle               (default 't')
+
+# vim: set filetype=conf:
