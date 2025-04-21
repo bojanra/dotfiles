@@ -9,19 +9,7 @@ nal features.
 
 ## getting started
 
-### minimal quickstart
-
-```sh
-bash <(curl -sS https://raw.githubusercontent.com/ferdinandyb/dotfiles/master/.config/yadm/minimalbootstrap)
-```
-
 ### manual
-
-Install yadm:
-
-```sh
-curl -fLo ~/.local/bin/yadm https://github.com/TheLocehiliosan/yadm/raw/master/yadm && chmod a+x ~/.local/bin/yadm
-```
 
 Clone the repo:
 
