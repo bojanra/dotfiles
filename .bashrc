@@ -145,9 +145,6 @@ shopt -s autocd
 
 export EDITOR=/usr/bin/nvim
 
-source ~/.config/lf/lf.bash
-export LF_BOOKMARK_PATH=~/.config/lf/bookmark
-
 # McFly - fly through your shell history
 # https://github.com/cantino/mcfly
 if [[ -r ~/bin/mcfly.bash ]]; then
@@ -201,6 +198,10 @@ rfv() (
     --preview-window '~4,+{2}+4/3,<80(up)' \
     --query "$*"
 )
+
+# configuration of lf - https://github.com/gokcehan/lf
+source ~/.config/lf/lf.bash
+export LF_BOOKMARK_PATH=~/.config/lf/bookmark
 
 # This is the list for lf icons:
 export LF_ICONS="di=📁:\
