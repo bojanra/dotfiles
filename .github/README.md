@@ -11,7 +11,7 @@ nal features.
 
 ### minimal quickstart
 
-```
+```sh
 bash <(curl -sS https://raw.githubusercontent.com/ferdinandyb/dotfiles/master/.config/yadm/minimalbootstrap)
 ```
 
@@ -19,18 +19,18 @@ bash <(curl -sS https://raw.githubusercontent.com/ferdinandyb/dotfiles/master/.c
 
 Install yadm:
 
-```
+```sh
 curl -fLo ~/.local/bin/yadm https://github.com/TheLocehiliosan/yadm/raw/master/yadm && chmod a+x ~/.local/bin/yadm
 ```
 
 Clone the repo:
 
-```
-yadm clone https://github.com/ferdinandyb/dotfiles.git
+```sh
+yadm clone https://github.com/bojanra/dotfiles
 ```
 
 Or if you have a key on the machine:
 
-```
-yadm clone git@github.com:ferdinandyb/dotfiles.git
+```sh
+yadm clone git@github.com:bojanra/dotfiles.git
 ```
