@@ -73,7 +73,7 @@ alias lt='ls -l --tree --level=2'
 
 # replace cat with bat
 # https://github.com/sharkdp/bat/
-alias cat='batcat'
+alias cat='bat'
 export BAT_STYLE=header
 
 # faster ack
@@ -143,7 +143,11 @@ complete -F _bartib_completions bartib
 # - type the directory name to change into
 shopt -s autocd
 
-export EDITOR=/usr/bin/nvim
+if [[ -r /usr/bin/nvim ]]; then
+  export EDITOR=/usr/bin/nvim
+else
+  export EDITOR=/usr/bin/vim
+fi
 
 # McFly - fly through your shell history
 # https://github.com/cantino/mcfly
@@ -151,53 +155,47 @@ if [[ -r ~/bin/mcfly.bash ]]; then
   source ~/bin/mcfly.bash
 fi
 
-source ~/bin/key-bindings.bash
-source ~/bin/completion.bash
+# FZF stuff
+if [[ -r ~/bin/fzf ]]; then
+  source ~/bin/key-bindings.bash
+  source ~/bin/completion.bash
 
-# using ripgrep combined with preview
-# find-in-file - usage: fif <searchTerm>
-fif() {
-  if [ ! "$#" -gt 0 ]; then
-    echo "Need a string to search for!"
-    return 1
-  fi
-  rg --files-with-matches --no-messages "$1" | fzf --preview "highlight -O ansi -l {} 2> /dev/null | rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$1' || rg --ignore-case --pretty --context 10 '$1' {}"
-}
+  # fkill - kill processes - list only the ones you can kill. Modified the earlier script.
+  fkill() {
+    local pid
+    if [ "$UID" != "0" ]; then
+      pid=$(ps -f -u $UID | sed 1d | fzf -m | awk '{print $2}')
+    else
+      pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
+    fi
 
-# fkill - kill processes - list only the ones you can kill. Modified the earlier script.
-fkill() {
-  local pid
-  if [ "$UID" != "0" ]; then
-    pid=$(ps -f -u $UID | sed 1d | fzf -m | awk '{print $2}')
-  else
-    pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
-  fi
+    if [ "x$pid" != "x" ]; then
+      echo $pid | xargs kill -${1:-9}
+    fi
+  }
 
-  if [ "x$pid" != "x" ]; then
-    echo $pid | xargs kill -${1:-9}
-  fi
-}
-
-# taken from https://junegunn.github.io/fzf/examples/git/
-# ripgrep->fzf->vim [QUERY]
-# rfv [querystring]
-rfv() (
-  RELOAD='reload:rg --column --color=always --smart-case {q} || :'
-  OPENER='if [[ $FZF_SELECT_COUNT -eq 0 ]]; then
+  # taken from https://junegunn.github.io/fzf/examples/git/
+  # ripgrep->fzf->vim [QUERY]
+  # rfv [querystring]
+  rfv() (
+    RELOAD='reload:rg --column --color=always --smart-case {q} || :'
+    OPENER='if [[ $FZF_SELECT_COUNT -eq 0 ]]; then
             nvim {1} +{2}     # No selection. Open the current line in Vim.
           else
             nvim {+f}  # Build quickfix list for the selected items.
           fi'
-  fzf --disabled --ansi --multi \
-    --bind "start:$RELOAD" --bind "change:$RELOAD" \
-    --bind "enter:become:$OPENER" \
-    --bind "ctrl-o:execute:$OPENER" \
-    --bind 'alt-a:select-all,alt-d:deselect-all,ctrl-/:toggle-preview' \
-    --delimiter : \
-    --preview 'batcat --style=full --color=always --highlight-line {2} {1}' \
-    --preview-window '~4,+{2}+4/3,<80(up)' \
-    --query "$*"
-)
+    fzf --disabled --ansi --multi \
+      --bind "start:$RELOAD" --bind "change:$RELOAD" \
+      --bind "enter:become:$OPENER" \
+      --bind "ctrl-o:execute:$OPENER" \
+      --bind 'alt-a:select-all,alt-d:deselect-all,ctrl-/:toggle-preview' \
+      --delimiter : \
+      --preview 'batcat --style=full --color=always --highlight-line {2} {1}' \
+      --preview-window '~4,+{2}+4/3,<80(up)' \
+      --query "$*"
+  )
+
+fi
 
 # configuration of lf - https://github.com/gokcehan/lf
 source ~/.config/lf/lf.bash
