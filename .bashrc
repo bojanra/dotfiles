@@ -176,8 +176,9 @@ if [[ -r ~/bin/fzf ]]; then
 
   # taken from https://junegunn.github.io/fzf/examples/git/
   # ripgrep->fzf->vim [QUERY]
-  # rfv [querystring]
-  rfv() (
+  # like ack but interactively
+  # acki [querystring]
+  acki() (
     RELOAD='reload:rg --column --color=always --smart-case {q} || :'
     OPENER='if [[ $FZF_SELECT_COUNT -eq 0 ]]; then
             nvim {1} +{2}     # No selection. Open the current line in Vim.
