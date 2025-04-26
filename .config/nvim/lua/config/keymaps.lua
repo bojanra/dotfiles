@@ -46,13 +46,3 @@ local function toggle_list()
 end
 
 vim.keymap.set("n", "<leader>um", toggle_list, { desc = "Toggle listchars" })
-
--- AI
-vim.keymap.set("n", "<leader>ai", function()
-  require("minuet.chat").open()
-end, { desc = "Minuet AI Chat" })
-
--- Example to run a query and display in a popup
-vim.keymap.set("n", "<leader>aq", function()
-  require("minuet.query").run("Explain this code:")
-end, { desc = "Minuet AI Query" })

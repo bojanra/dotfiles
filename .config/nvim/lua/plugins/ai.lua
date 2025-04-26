@@ -1,26 +1,39 @@
---if true then return {} end
---
+-- if true then return {} end
+
 return {
-  {
-    "milanglacier/minuet-ai.nvim",
-    dependencies = {
-      "nvim-lua/popup.nvim",
-      "nvim-lua/plenary.nvim",
-      "hrsh7th/nvim-cmp", -- Completion framework (highly recommended)
-    },
-    config = function()
-      require("minuet").setup({
-        model = "gemma3", -- Or the Gemma model you downloaded with Ollama
-        api_key = "TERM",
-        --        api_base = "http://localhost:11434", -- Default Ollama API address
-        end_point = "http://localhost:11434/v1/completions",
-        --  Optional settings:
-        prompt_prefix = "User: ",
-        prompt_suffix = "Assistant:",
-        max_tokens = 512, -- Adjust as needed
-        temperature = 0.7, -- Adjust for creativity
-        top_p = 0.9,
-      })
-    end,
+  "olimorris/codecompanion.nvim",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    "nvim-treesitter/nvim-treesitter",
   },
+  config = function()
+    require("codecompanion").setup({
+      adapters = {
+        ollama = function()
+          return require("codecompanion.adapters").extend("ollama", {
+            provider = {
+              name = "ollama",
+              param = {
+                model = "gemma3", -- Use your pulled model name
+                api_base = "http://localhost:11434", -- Ollama's default API address
+              },
+            },
+            parameters = {
+              sync = true,
+            },
+          })
+        end,
+      },
+      display = {
+        chat = {
+          render_headers = false,
+        },
+      },
+      strategies = {
+        chat = { adapter = "ollama" },
+        inline = { adapter = "ollama" },
+        agent = { adapter = "ollama" },
+      },
+    })
+  end,
 }
