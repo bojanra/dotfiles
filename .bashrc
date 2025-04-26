@@ -280,3 +280,6 @@ ex=🎯:\
 *.jar=♨:\
 *.java=♨:\
 "
+
+# import the OPENAI_API_KEY
+[ -f ~/.openai.env ] && source ~/.openai.env

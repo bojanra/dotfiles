@@ -1,9 +1,11 @@
-[core]
-  whitespace = blank-at-eol,blank-at-eof,tab-in-indent
-  excludesfile = /home/ramsakb/.gitignore
 [user]
 	email = bojan.ramsak@rtvslo.si
 	name = Bojan Ramšak
+[github]
+  user = bojanra
+[core]
+  whitespace = blank-at-eol,blank-at-eof,tab-in-indent
+  excludesfile = /home/ramsakb/.gitignore
 [push]
 	default = simple
 [diff]
@@ -19,12 +21,11 @@
   autocorrect = 10
 [mergetool "meld"]
 #   cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
-[color]
-	ui = auto
 [pull]
   # Preserve the history of everybody and avoid origin merge commits
 	rebase = true
 [color]
+	ui = auto
   branch = auto
   diff = auto
   status = auto

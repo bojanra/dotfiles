@@ -1,6 +1,5 @@
 -- Keymaps are automatically loaded on the VeryLazy event
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
--- Add any additional keymaps here
 
 local opts = { noremap = true, silent = true }
 
@@ -9,7 +8,6 @@ local keymap = vim.api.nvim_set_keymap
 keymap("i", "hh", "=>", opts)
 keymap("i", "kk", "->", opts)
 keymap("i", "kkk", "->{}<ESC>i", opts)
--- keymap("i", "ddd", '<Esc>:r ! date +"\\#\\# \\%Y-\\%m-\\%d \\%H:\\%M" <CR>', opts)
 
 -- Navigate buffers
 keymap("n", "<S-l>", ":bnext<CR>", opts)
