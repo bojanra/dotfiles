@@ -6,6 +6,13 @@ return {
     "robitx/gp.nvim",
     config = function()
       require("gp").setup({
+        log_sensitive = false,
+        log_file = vim.fn.stdpath("log"):gsub("/$", "") .. "/gp.nvim.log",
+        state_dir = vim.fn.stdpath("data"):gsub("/$", "") .. "/gp/persisted",
+        whisper = {
+          disable = true,
+        },
+        image = { disable = true },
         providers = {
           openai = {
             disable = false,
