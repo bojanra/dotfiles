@@ -34,6 +34,10 @@ cmd open ${{
     esac
 }}
 
+cmd opencaja ${{
+    caja $PWD
+}}
+
 cmd on-redraw %{{
     if [ $lf_width -le 80 ]; then
         lf -remote "send $id set ratios 1:2"
@@ -290,13 +294,16 @@ map Q quit-and-cd    # change to current directory on exit
 # copy path to clipboard
 map \;c $echo "$f" | xclip -selection clipboard && notify-send 'lf' "path to <i>$(basename "$f")</i> copied to clipboard"
 
+## open caja in currentdir
+map cc opencaja
+
 # Movement
 map gD cd ~/Desktop
 map gC cd ~/03_work/02_cherry/01_vm/cherryTool/
 map gL follow-link
-map gs :fzf_search
+map gs :fzf_search    # search in file
 map \;j cd ~
-map <c-f> :fzf_jump
+map <c-f> :fzf_jump   # search filename
 
 # commands
 #  quit                     (default 'q')

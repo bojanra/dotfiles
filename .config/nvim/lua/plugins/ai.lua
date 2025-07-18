@@ -3,6 +3,7 @@
 return {
   {
     -- apt-get install sox libsox-fmt-mp3
+    -- https://github.com/Robitx/gp.nvim
     "robitx/gp.nvim",
     config = function()
       require("gp").setup({
@@ -19,9 +20,6 @@ return {
             endpoint = "https://api.openai.com/v1/chat/completions",
             secret = os.getenv("OPENAI_API_KEY"),
           },
-          ollama = {
-            endpoint = "http://localhost:11434/v1/chat/completions",
-          },
         },
         agents = {
           {
@@ -34,6 +32,8 @@ return {
             system_prompt = require("gp.defaults").chat_system_prompt,
           },
         },
+        default_command_agent = "ChatGPT3-5",
+        default_chat_agent = "ChatGPT3-5",
         cmd_prefix = "Gp",
         curl_params = {},
 
@@ -178,15 +178,15 @@ return {
           -- 	vim.api.nvim_command("%" .. gp.config.cmd_prefix .. "ChatNew")
           -- end,
 
-          -- -- example of adding command which opens new chat dedicated for translation
-          -- Translator = function(gp, params)
-          -- 	local chat_system_prompt = "You are a Translator, please translate between English and Chinese."
-          -- 	gp.cmd.ChatNew(params, chat_system_prompt)
-          --
-          -- 	-- -- you can also create a chat with a specific fixed agent like this:
-          -- 	-- local agent = gp.get_chat_agent("ChatGPT4o")
-          -- 	-- gp.cmd.ChatNew(params, chat_system_prompt, agent)
-          -- end,
+          -- example of adding command which opens new chat dedicated for translation
+          Translator = function(gp, params)
+            local chat_system_prompt = "You are a Translator, please translate between English and Chinese."
+            gp.cmd.ChatNew(params, chat_system_prompt)
+
+            -- -- you can also create a chat with a specific fixed agent like this:
+            -- local agent = gp.get_chat_agent("ChatGPT4o")
+            -- gp.cmd.ChatNew(params, chat_system_prompt, agent)
+          end,
 
           -- -- example of adding command which writes unit tests for the selected code
           -- UnitTests = function(gp, params)
@@ -198,13 +198,13 @@ return {
           -- end,
 
           -- -- example of adding command which explains the selected code
-          -- Explain = function(gp, params)
-          -- 	local template = "I have the following code from {{filename}}:\n\n"
-          -- 		.. "```{{filetype}}\n{{selection}}\n```\n\n"
-          -- 		.. "Please respond by explaining the code above."
-          -- 	local agent = gp.get_chat_agent()
-          -- 	gp.Prompt(params, gp.Target.popup, agent, template)
-          -- end,
+          Explain = function(gp, params)
+            local template = "I have the following code from {{filename}}:\n\n"
+              .. "```{{filetype}}\n{{selection}}\n```\n\n"
+              .. "Please respond by explaining the code above."
+            local agent = gp.get_chat_agent()
+            gp.Prompt(params, gp.Target.popup, agent, template)
+          end,
         },
       })
       require("which-key").add({
@@ -279,7 +279,6 @@ return {
           { "<C-g>ww", "<cmd>GpWhisper<cr>", desc = "Whisper" },
           { "<C-g>x", "<cmd>GpContext<cr>", desc = "Toggle GpContext" },
         },
-
         -- INSERT mode mappings
         {
           mode = { "i" },
