@@ -218,7 +218,6 @@ cmd reload-config ${{
 # map '"'
 map m
 map o
-map n
 map d
 map c
 map e
@@ -253,6 +252,8 @@ map ec $$EDITOR ~/.config/lf/lfrc
 map er reload-config
 map ee $$EDITOR "$f"
 map ol !lazygit "$f"
+
+map n !ncdu i
 
 # Archive Mappings
 map az zip

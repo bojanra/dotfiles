@@ -305,14 +305,14 @@ set -g prefix C-a
 bind C-a send-prefix
 
 # F11 and F12 to switch between windows
-# bind-key -n F11 previous-window
-# bind-key -n F12 next-window
+bind-key -n F11 previous-window
+bind-key -n F12 next-window
 # compatibility
 bind -r p previous-window 
 bind -r n next-window
 # vim keys
-bind -r h previous-window 
-bind -r l next-window
+# bind -r h previous-window 
+# bind -r l next-window
 # simple move with shift arrow
 bind -n S-Left  previous-window
 bind -n S-Right next-window
