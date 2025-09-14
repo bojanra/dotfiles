@@ -246,6 +246,8 @@ map sP :{{
     set ratios 1:1:2
 }}
 
+map sg :fzf_search    # search in file
+
 # File Openers
 # edit config
 map ec $$EDITOR ~/.config/lf/lfrc
@@ -302,7 +304,6 @@ map cc opencaja
 map gD cd ~/Desktop
 map gC cd ~/03_work/02_cherry/01_vm/cherryTool/
 map gL follow-link
-map gs :fzf_search    # search in file
 map \;j cd ~
 map <c-f> :fzf_jump   # search filename
 
