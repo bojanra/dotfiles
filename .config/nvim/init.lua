@@ -11,3 +11,14 @@ vim.filetype.add({
 
 vim.opt.title = true
 vim.opt.titlestring = [[%f %h%m%r%w %{v:progname} (%{tabpagenr()} of %{tabpagenr('$')})]]
+
+require("lualine").setup({
+  sections = {
+    lualine_b = {
+      {
+        require("micropython_nvim").statusline,
+        cond = package.loaded["micropython_nvim"] and require("micropython_nvim").exists,
+      },
+    },
+  },
+})

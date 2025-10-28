@@ -21,4 +21,10 @@ r ! date +\#\#\ \%Y-\%m-\%d\ \%H:\%M
 
 Run `:TSInstall perl`
 
-```
+## Look in store for plugins
+
+    :Store
+
+## Health checks
+
+    :Healthcheck
