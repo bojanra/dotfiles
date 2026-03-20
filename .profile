@@ -23,3 +23,6 @@ fi
 
 # nim language
 PATH=/home/ramsakb/.nimble/bin:$PATH
+
+# .local for python
+PATH=/home/ramsakb/.local/bin:$PATH

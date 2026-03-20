@@ -8,6 +8,7 @@
 
 #* DOC:
 # https://godoc.org/github.com/gokcehan/lf
+# [!lazyvim $f] run shell command on file
 set shell sh
 set shellopts '-eu'
 set ifs "\n"
@@ -46,6 +47,16 @@ cmd on-redraw %{{
     else
         lf -remote "send $id set ratios 1:2"
     fi
+}}
+
+cmd help ${{
+    line=$(grep '^# \[' ~/.config/lf/lfrc \
+        | sed 's/^# \[\(.*\)\] /\1\t/' \
+        | fzf --prompt="lf>" --preview "")
+
+    key=$(printf "%s" "$line" | cut -f1)
+
+    [ -n "$key" ] && lf -remote "send $id push $key"
 }}
 
 cmd mkdir ${{
@@ -198,10 +209,9 @@ cmd bookmark_create ${{
     echo $PWD > $LF_BOOKMARK_PATH/$ans
 }}
 
-# allow to change directory on exit - Q
-cmd quit-and-cd &{{
+# change directory
+cmd cd_current &{{
     pwd > $LF_CD_FILE
-    lf -remote "send $id quit"
 }}
 
 cmd follow-link %{{
@@ -225,87 +235,103 @@ map f
 map t
 map \;
 
-#** sort
-map st :{{
-    set sortby time
-    set info time
-}}
-
+# [sg] search in files
+map sg :fzf_search
+# [sr] split preview 1:3
 map sr :{{
     set nopreview
     set ratios 1:3
 }}
-
+# [sp] split preview 1:2
 map sp :{{
     set preview
     set ratios 1:2
 }}
-
+# [sP] split preview 1:1:2
 map sP :{{
     set preview
     set ratios 1:1:2
 }}
 
-map sg :fzf_search    # search in file
+map <enter> open
 
-# File Openers
-# edit config
+# [s] sort by ...
+
+# [e] edit ...
 map ec $$EDITOR ~/.config/lf/lfrc
 map er reload-config
 map ee $$EDITOR "$f"
-map ol !lazygit "$f"
 
+# [ol] lazygit
+map ol !lazygit
+
+# [n] disk usage - ncdu
 map n !ncdu i
 
-# Archive Mappings
+# [a] archive Mappings ...
 map az zip
 map at tar
 map ag targz
 map ab targz
 map au unarchive
 
-# Trash Mappings
-map dd trash
-map tc clear_trash
-map td restore_trash
+# [d] trash handling ...
+map dd trash file
+map dcy clear_trash
+map dr restore_trash
+# [DD] DELETE without trash
+map DD delete
+
+# [t] open kitty tab in directory under cu
+map t :$ kitty @ launch --type=tab --cwd "$f"
 
 # Basic Functions
+# [.] toggle show hidden files
 map . set hidden!
-map DD delete
+# [p] paste
 map p paste
+# [x] cut
 map x cut
+# [y] copy - yank
 map y copy
-map <enter> open
+# [m] make file, dir...
 map mf mkfile
 map mr sudomkfile
 map md mkdir
-map ms $mkscript
+# [ch] chmod
 map ch chmod
-map bg setwallpaper
-map br bulk-rename
+# [ ] .
+# [b] bookmark ...
 map bb bookmark_create
 map bj bookmark_jump
-# map r :rename; cmd-delete-home
+# [R] rename but delete original
+map R :rename; cmd-delete-home
+# [r] rename
 map r :rename;cmd-home
-map R reload
+# [br] bulk rename
+map br bulk-rename
+# [C] clear
 map C clear
+# [+] select all
 map + glob-select *
+# [U] unselect
 map U unselect
+# [c-o] go to background
 map <c-o> $ kill -STOP $PPID  # go to background
-map Q quit-and-cd    # change to current directory on exit
-
-# copy path to clipboard
+# [Q] change to current dir
+map Q cd_current
+# [;c] copy path to clipboard
 map \;c $echo "$f" | xclip -selection clipboard && notify-send 'lf' "path to <i>$(basename "$f")</i> copied to clipboard"
-
-## open caja in currentdir
+# [cc] open caja in currentdir
 map cc opencaja
-
-# Movement
+# [g] go to ...
 map gD cd ~/Desktop
 map gC cd ~/03_work/02_cherry/01_vm/cherryTool/
 map gL follow-link
-map \;j cd ~
+# [c-f] search for file
 map <c-f> :fzf_jump   # search filename
+# [h] show help
+map h :help
 
 # commands
 #  quit                     (default 'q')

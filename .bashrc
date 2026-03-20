@@ -31,6 +31,8 @@ if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
   debian_chroot=$(cat /etc/debian_chroot)
 fi
 
+export DEVBOX_BADGE="⬢ DEVBOX"
+
 # use the powerline-go for a fancy prompt
 # https://github.com/justjanne/powerline-go
 function _update_ps1() {
@@ -42,6 +44,10 @@ function _update_ps1() {
     -git-mode compact \
     -error $? \
     -newline)"
+
+  if [ -n "$DEVBOX_PROJECT_ROOT" ]; then
+    PS1="\[\e[1;31m\]$DEVBOX_BADGE\[\e[0m\] $PS1"
+  fi
 }
 
 PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
@@ -106,12 +112,8 @@ alias gll="git log --graph --pretty=format:'%C(red)%h%Creset -%C(yellow)%d%Crese
 alias gls="git ls-tree --full-tree -r --name-only HEAD"
 alias gclean="git clean -nxd"
 
-# vagrant alias
-alias vup="vagrant up"
-alias vsu="vagrant suspend"
-alias vss="vagrant ssh"
-alias vde="vagrant destroy"
-alias vpr="vagrant provision"
+# devbox zinka shortcut
+alias zinka="cd ~/01_rtv/85_zBox/; devbox run zinka"
 
 alias diff='colordiff'
 alias path='echo -e ${PATH//:/\\n}'

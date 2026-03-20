@@ -19,6 +19,7 @@ return {
         "tsx",
         "typescript",
         "vim",
+        "todotxt",
         "yaml",
       },
     },

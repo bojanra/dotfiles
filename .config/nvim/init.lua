@@ -7,6 +7,9 @@ vim.filetype.add({
     [".*%.tt"] = "html",
     [".*%.md"] = "markdown",
   },
+  filename = {
+    ["todo.txt"] = "todotxt",
+  },
 })
 
 vim.opt.title = true
