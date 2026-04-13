@@ -8,22 +8,31 @@
   excludesfile = /home/ramsakb/.gitignore
 [push]
 	default = simple
+[pull]
+  # Preserve the history of everybody and avoid origin merge commits
+	rebase = true
+[help]  
+  autocorrect = 10
 [diff]
 	tool = meld
   guitool = meld
   algorithm = histogram
 [difftool]
+  prompt = false
+[difftool "meld"]
+  cmd = meld "$LOCAL" "$REMOTE"
+[mergetool]
+	keepBackup = false
 	prompt = false
 [merge]
 	tool = meld
   conflictsytle = zdiff3
-[help]  
-  autocorrect = 10
 [mergetool "meld"]
-#   cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
-[pull]
-  # Preserve the history of everybody and avoid origin merge commits
-	rebase = true
+cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
+# [merge]
+#   tool = "nvim"
+# [mergetool "nvim"]
+#   cmd = nvim -d "$LOCAL" "$MERGED" "$REMOTE"
 [color]
 	ui = auto
   branch = auto

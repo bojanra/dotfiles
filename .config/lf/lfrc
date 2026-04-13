@@ -1,15 +1,15 @@
-  ##      ##
-   #     #  #
-   #     #
-   #    ####
-   #     #
-   #     #
-  ###    #
-
+#  ██   ████
+# ░██  ░██░
+# ░██ ██████ ██████  █████
+# ░██░░░██░ ░░██░░█ ██░░░██
+# ░██  ░██   ░██ ░ ░██  ░░
+# ░██  ░██   ░██   ░██   ██
+# ███  ░██  ░███   ░░█████
+#░░░   ░░   ░░░     ░░░░░
 #* DOC:
 # https://godoc.org/github.com/gokcehan/lf
 # [!lazyvim $f] run shell command on file
-set shell sh
+set shell "bash"
 set shellopts '-eu'
 set ifs "\n"
 
@@ -26,6 +26,7 @@ set ignorecase true
 # set hidden true
 set scrolloff 10
 set info size:time
+set ruler 'df:acc:progress:selection:filter:ind'
 
 # Custom Functions
 cmd open ${{
@@ -209,9 +210,9 @@ cmd bookmark_create ${{
     echo $PWD > $LF_BOOKMARK_PATH/$ans
 }}
 
-# change directory
-cmd cd_current &{{
+cmd quit-and-cd &{{
     pwd > $LF_CD_FILE
+    lf -remote "send $id quit"
 }}
 
 cmd follow-link %{{
@@ -222,18 +223,194 @@ cmd reload-config ${{
     lf -remote "send $id source ~/.config/lf/lfrc"
 }}
 
+cmd newfile ${{
+    printf "Enter filename: "
+    read fname
+    touch "$fname"
+    $EDITOR "$fname"
+}}
+
+# Ansible Commands:
+# The following commands help manage Ansible playbooks directly from lf.
+#
+#
+# Command to check syntax of the selected Ansible playbook
+
+cmd ansible-syntax-check ${{
+    clear
+    echo "=== Ansible Playbook Syntax Check ==="
+    echo "File: $f"
+    echo ""
+    
+    if [ ! -f "$f" ]; then
+        echo "❌ File not found or not selected"
+        printf "Press Enter to continue..."
+        read dummy
+        return
+    fi
+    
+    case "$f" in
+        *.yml|*.yaml)
+            echo "🔍 Checking YAML playbook syntax..."
+            echo ""
+            if ! command -v ansible-playbook >/dev/null 2>&1; then
+                echo "❌ ansible-playbook command not found"
+                echo "Install Ansible: apt install ansible"
+                printf "Press Enter to continue..."
+                read dummy
+                return
+            fi
+            
+            if ansible-playbook --syntax-check "$f"; then
+                echo ""
+                echo "✅ Syntax is correct!"
+            else
+                echo ""
+                echo "❌ Syntax errors detected"
+            fi
+            ;;
+        *)
+            echo "⚠️  File is not a YAML playbook (.yml/.yaml)"
+            echo "Selected file: $(basename "$f")"
+            ;;
+    esac
+    
+    echo ""
+    printf "Press Enter to continue..."
+    read dummy
+}}
+
+map s ansible-syntax-check
+
+# A command for a dry-run check
+# ---
+# This command performs an Ansible dry run, allowing you to see what changes would be made without actually applying them.
+
+cmd ansible-dry-run ${{
+    clear
+    echo "=== Ansible Playbook Dry Run ==="
+    echo "File: $f"
+    echo ""
+    
+    if [ ! -f "$f" ]; then
+        echo "❌ File not found"
+        printf "Press Enter to continue..."
+        read dummy
+        return
+    fi
+    
+    case "$f" in
+        *.yml|*.yaml)
+            if ! command -v ansible-playbook >/dev/null 2>&1; then
+                echo "❌ Ansible is not installed"
+                printf "Press Enter to continue..."
+                read dummy
+                return
+            fi
+            
+            echo "🧪 Performing dry run (simulated execution)..."
+            echo "This will show what WOULD be done, but will NOT perform any real changes."
+            echo ""
+            
+            # Performing a dry-run check with inventory
+            if ansible-playbook -i ../inventories/my_hosts.ini --check --diff "$f"; then
+                echo ""
+                echo "✅ Dry run completed successfully!"
+            else
+                echo ""
+                echo "❌ Errors detected during dry run"
+            fi
+            ;;
+        *)
+            echo "⚠️  File is not a YAML playbook"
+            ;;
+    esac
+    
+    echo ""
+    printf "Press Enter to continue..."
+    read dummy
+}}
+
+map S ansible-dry-run
+
+# A command to run the playbook
+# ---
+# This command executes an Ansible playbook, applying real changes to the target systems.
+cmd ansible-run ${{
+    clear
+    echo "=== Running Ansible Playbook ==="
+    echo "File: $f"
+    echo ""
+    
+    if [ ! -f "$f" ]; then
+        echo "❌ File not found"
+        printf "Press Enter to continue..."
+        read dummy
+        return
+    fi
+    
+    case "$f" in
+        *.yml|*.yaml)
+            if ! command -v ansible-playbook >/dev/null 2>&1; then
+                echo "❌ Ansible is not installed"
+                printf "Press Enter to continue..."
+                read dummy
+                return
+            fi
+            
+            echo "🚀 ATTENTION! This will perform a REAL playbook run!"
+            echo "This will make changes to the system!"
+            echo ""
+            printf "Continue with execution? (y/N): "
+            read confirm
+            
+            case "$confirm" in
+                [Yy]|[Yy][Ee][Ss])
+                    echo ""
+                    echo "🔥 Executing playbook..."
+                    echo ""
+                    
+                    # Executing the playbook with inventory (relative path from the playbooks folder)
+                    if ansible-playbook -i ../inventories/my_hosts.ini "$f"; then
+                        echo ""
+                        echo "✅ Playbook executed successfully!"
+                    else
+                        echo ""
+                        echo "❌ Errors detected during playbook execution"
+                    fi
+                    ;;
+                *)
+                    echo ""
+                    echo "❌ Execution canceled"
+                    ;;
+            esac
+            ;;
+        *)
+            echo "⚠️  File is not a YAML playbook"
+            ;;
+    esac
+    
+    echo ""
+    printf "Press Enter to continue..."
+    read dummy
+}}
+
+map r ansible-run
 # Key Bindings
 # Remove some defaults
 # map "'"
 # map '"'
 map m
-map o
 map d
 map c
 map e
 map f
 map t
 map \;
+
+# [o] open file with mimeopen
+map o &mimeopen $f
+map O $mimeopen --ask $f
 
 # [sg] search in files
 map sg :fzf_search
@@ -265,8 +442,11 @@ map ee $$EDITOR "$f"
 # [ol] lazygit
 map ol !lazygit
 
-# [n] disk usage - ncdu
+# [N] disk usage - ncdu
 map n !ncdu i
+
+# [n] create new file
+map n :newfile
 
 # [a] archive Mappings ...
 map az zip
@@ -307,7 +487,7 @@ map bj bookmark_jump
 # [R] rename but delete original
 map R :rename; cmd-delete-home
 # [r] rename
-map r :rename;cmd-home
+map r :rename; cmd-home
 # [br] bulk rename
 map br bulk-rename
 # [C] clear
@@ -318,18 +498,24 @@ map + glob-select *
 map U unselect
 # [c-o] go to background
 map <c-o> $ kill -STOP $PPID  # go to background
-# [Q] change to current dir
-map Q cd_current
+# [Q] change to current dir and exit
+map Q quit-and-cd
 # [;c] copy path to clipboard
 map \;c $echo "$f" | xclip -selection clipboard && notify-send 'lf' "path to <i>$(basename "$f")</i> copied to clipboard"
-# [cc] open caja in currentdir
-map cc opencaja
+# [cc] open file manager in current directory
+map cc push &xdg-open<space>.<enter>
 # [g] go to ...
 map gD cd ~/Desktop
 map gC cd ~/03_work/02_cherry/01_vm/cherryTool/
 map gL follow-link
 # [c-f] search for file
 map <c-f> :fzf_jump   # search filename
+# [F2] rename
+map <f-2> :rename
+# [F4] edit file
+map <f-4> $$EDITOR "$f"
+# [F7] create/make directories
+map <f-7> :mkdir
 # [h] show help
 map h :help
 
