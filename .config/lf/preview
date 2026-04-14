@@ -15,7 +15,12 @@ numb=$(printf "%0.f\n" "$(echo "$(tput cols) - $num - 1" | bc)")
 numc=$(printf "%0.f\n" "$(echo "$(tput lines) - 2" | bc)")
 
 image() {
-  kitty +kitten icat --silent --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$1"
+  if [ "$lf_user_exif_view" = true ]; then
+    exiftool "$1"
+  else
+    kitty +kitten icat --silent --stdin no --transfer-mode file --place "${w}x${h}@${x}x${y}" "$1"
+  #  chafa "$1"
+  fi
 }
 
 case "$file" in

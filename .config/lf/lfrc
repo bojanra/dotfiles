@@ -6,8 +6,9 @@
 # ░██  ░██   ░██   ░██   ██
 # ███  ░██  ░███   ░░█████
 #░░░   ░░   ░░░     ░░░░░
-#* DOC:
+#
 # https://godoc.org/github.com/gokcehan/lf
+
 # [!lazyvim $f] run shell command on file
 set shell "bash"
 set shellopts '-eu'
@@ -17,13 +18,12 @@ set cleaner ~/.config/lf/clean
 set previewer ~/.config/lf/preview
 set preview true
 set hiddenfiles ".*:*.log"
+set user_exif_view false
 
 set ratios 1:2
 set scrolloff 10
 set icons
 set ignorecase true
-# set drawbox true
-# set hidden true
 set scrolloff 10
 set info size:time
 set ruler 'df:acc:progress:selection:filter:ind'
@@ -34,6 +34,15 @@ cmd open ${{
         text/*|application/json) $EDITOR "$f";;
         *) xdg-open "$f" ;;
     esac
+}}
+
+cmd toggle_exif_view &{{
+    # reload is used to clear any previews that have been cached
+    if [ "$lf_user_exif_view" != true ]; then
+        lf -remote "send $id :set user_exif_view true; reload"
+    else
+        lf -remote "send $id :set user_exif_view false; reload"
+    fi
 }}
 
 cmd opencaja ${{
@@ -93,7 +102,7 @@ cmd sudomkfile ${{
 cmd setwallpaper %cp "$f" ~/.config/wall.png && xwallpaper --zoom "$f"
 
 cmd fzf_jump ${{
-  res="$(find . -maxdepth 4 -not -path "*.git/*" -not -path "*.tidyall*" -not -path "*.npm*" -not -path "*cache*" -not -path "*.mozilla*" -not -path "*.eclipse*" | sk --reverse --header='Jump to location')"
+  res="$(find . -maxdepth 4 -not -path "*.git/*" -not -path "*.tidyall*" -not -path "*.npm*" -not -path "*cache*" -not -path "*.mozilla*" -not -path "*.eclipse*" | fzf --reverse --header='Jump to location')"
   if [ -f "$res" ]; then
     cmd="select"
   elif [ -d "$res" ]; then
@@ -111,9 +120,6 @@ cmd fzf_search ${{
         --preview 'batcat --style=full --color=always --highlight-line {2} {1}' \
         --preview-window '~4,+{2}+4/3,<80(up)' \
         --query "$*"
-        #--preview='cat -- {1}' # Use your favorite previewer here (bat, source-highlight, etc.), for example:
-        # Alternatively you can even use the same previewer you've configured for lf
-        #--preview='~/.config/lf/cleaner; ~/.config/lf/previewer {1} "$FZF_PREVIEW_COLUMNS" "$FZF_PREVIEW_LINES" "$FZF_PREVIEW_LEFT" "$FZF_PREVIEW_TOP"'
 }}
 
 # Archive bindings
@@ -280,8 +286,6 @@ cmd ansible-syntax-check ${{
     read dummy
 }}
 
-map s ansible-syntax-check
-
 # A command for a dry-run check
 # ---
 # This command performs an Ansible dry run, allowing you to see what changes would be made without actually applying them.
@@ -330,8 +334,6 @@ cmd ansible-dry-run ${{
     printf "Press Enter to continue..."
     read dummy
 }}
-
-map S ansible-dry-run
 
 # A command to run the playbook
 # ---
@@ -395,7 +397,6 @@ cmd ansible-run ${{
     read dummy
 }}
 
-map r ansible-run
 # Key Bindings
 # Remove some defaults
 # map "'"
@@ -408,24 +409,27 @@ map f
 map t
 map \;
 
+# [X] toggle alternative image preview
+map X toggle_exif_view
+
 # [o] open file with mimeopen
 map o &mimeopen $f
 map O $mimeopen --ask $f
 
 # [sg] search in files
 map sg :fzf_search
-# [sr] split preview 1:3
-map sr :{{
+# [Sr] split preview 1:3
+map Sr :{{
     set nopreview
     set ratios 1:3
 }}
-# [sp] split preview 1:2
-map sp :{{
+# [Sp] split preview 1:2
+map Sp :{{
     set preview
     set ratios 1:2
 }}
-# [sP] split preview 1:1:2
-map sP :{{
+# [SP] split preview 1:1:2
+map SP :{{
     set preview
     set ratios 1:1:2
 }}
@@ -433,6 +437,11 @@ map sP :{{
 map <enter> open
 
 # [s] sort by ...
+
+# [A] Ansible ...
+map As ansible-syntax-check
+map Ad ansible-dry-run
+map Ar ansible-run
 
 # [e] edit ...
 map ec $$EDITOR ~/.config/lf/lfrc
@@ -443,7 +452,7 @@ map ee $$EDITOR "$f"
 map ol !lazygit
 
 # [N] disk usage - ncdu
-map n !ncdu i
+map N !ncdu 
 
 # [n] create new file
 map n :newfile
@@ -480,7 +489,6 @@ map mr sudomkfile
 map md mkdir
 # [ch] chmod
 map ch chmod
-# [ ] .
 # [b] bookmark ...
 map bb bookmark_create
 map bj bookmark_jump
@@ -508,6 +516,9 @@ map cc push &xdg-open<space>.<enter>
 map gD cd ~/Desktop
 map gC cd ~/03_work/02_cherry/01_vm/cherryTool/
 map gL follow-link
+# [K...] list mappings
+map Km maps
+map Kc cmaps
 # [c-f] search for file
 map <c-f> :fzf_jump   # search filename
 # [F2] rename
@@ -516,73 +527,10 @@ map <f-2> :rename
 map <f-4> $$EDITOR "$f"
 # [F7] create/make directories
 map <f-7> :mkdir
+# [F8] trash
+map <f-8> trash file
 # [h] show help
 map h :help
 
-# commands
-#  quit                     (default 'q')
-#  up                       (default 'k' and '<up>')
-#  half-up                  (default '<c-u>')
-#  page-up                  (default '<c-b>' and '<pgup>')
-#  scroll-up                (default '<c-y>')
-#  down                     (default 'j' and '<down>')
-#  half-down                (default '<c-d>')
-#  page-down                (default '<c-f>' and '<pgdn>')
-#  scroll-down              (default '<c-e>')
-#  updir                    (default 'h' and '<left>')
-#  open                     (default 'l' and '<right>')
-#  jump-next                (default ']')
-#  jump-prev                (default '[')
-#  top                      (default 'gg' and '<home>')
-#  bottom                   (default 'G' and '<end>')
-#  high                     (default 'H')
-#  middle                   (default 'M')
-#  low                      (default 'L')
-#  toggle
-#  invert                   (default 'v')
-#  invert-below
-#  unselect                 (default 'u')
-#  glob-select
-#  glob-unselect
-#  calcdirsize
-#  clearmaps
-#  copy                     (default 'y')
-#  cut                      (default 'd')
-#  paste                    (default 'p')
-#  clear                    (default 'c')
-#  sync
-#  draw
-#  redraw                   (default '<c-l>')
-#  load
-#  reload                   (default '<c-r>')
-#  echo
-#  echomsg
-#  echoerr
-#  cd
-#  select
-#  delete         (modal)
-#  rename         (modal)   (default 'r')
-#  source
-#  push
-#  read           (modal)   (default ':')
-#  shell          (modal)   (default '$')
-#  shell-pipe     (modal)   (default '%')
-#  shell-wait     (modal)   (default '!')
-#  shell-async    (modal)   (default '&')
-#  find           (modal)   (default 'f')
-#  find-back      (modal)   (default 'F')
-#  find-next                (default ';')
-#  find-prev                (default ',')
-#  search         (modal)   (default '/')
-#  search-back    (modal)   (default '?')
-#  search-next              (default 'n')
-#  search-prev              (default 'N')
-#  filter         (modal)
-#  setfilter
-#  mark-save      (modal)   (default 'm')
-#  mark-load      (modal)   (default "'")
-#  mark-remove    (modal)   (default '"')
-#  tag
-#  tag-toggle               (default 't')
-
 # vim: set filetype=conf:
+
