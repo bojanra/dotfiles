@@ -23,23 +23,28 @@ HISTFILESIZE=2000
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
 
-export DEVBOX_BADGE="⬢ DEVBOX"
-
 # use the powerline-go for a fancy prompt
 # https://github.com/justjanne/powerline-go
 function _update_ps1() {
-  PS1="$(powerline-go \
-    -ignore-repos $HOME \
-    -alternate-ssh-icon \
-    -colorize-hostname \
-    -hostname-only-if-ssh \
-    -git-mode compact \
-    -error $? \
-    -newline)"
 
   if [ -n "$DEVBOX_PROJECT_ROOT" ]; then
-    PS1="\[\e[1;31m\]$DEVBOX_BADGE\[\e[0m\] $PS1"
+    export DEVBOX_BADGE="⬢ DEVBOX"
+  else
+    export DEVBOX_BADGE=""
   fi
+
+  PS1="$(powerline-go \
+    -cwd-mode semifancy \
+    -modules shell-var,venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root \
+    -alternate-ssh-icon \
+    -shell-var DEVBOX_BADGE \
+    -shell-var-no-warn-empty \
+    -ignore-repos $HOME \
+    -colorize-hostname \
+    -hostname-only-if-ssh \
+    -git-mode fancy \
+    -error $? \
+    -newline)"
 }
 
 PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"

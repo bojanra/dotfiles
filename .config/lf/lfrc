@@ -133,10 +133,10 @@ cmd unarchive ${{
   esac
 }}
 
-cmd zip %zip -r "$f" "$f"
-cmd tar %tar cvf "$f.tar" "$f"
-cmd targz %tar cvzf "$f.tar.gz" "$f"
-cmd tarbz2 %tar cjvf "$f.tar.bz2" "$f"
+cmd zip %zip -r "$f" `basename "$f"`
+cmd tar %tar cvf "$f.tar" `basename "$f"`
+cmd targz %tar cvzf "$f.tar.gz" `basename "$f"`
+cmd tarbz2 %tar cjvf "$f.tar.bz2" `basename "$f"`
 
 # Trash cli bindings
 # require apt install trash-cli
@@ -461,7 +461,7 @@ map n :newfile
 map az zip
 map at tar
 map ag targz
-map ab targz
+map ab tarbz2
 map au unarchive
 
 # [d] trash handling ...
