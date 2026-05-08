@@ -27,6 +27,7 @@ set ignorecase true
 set scrolloff 10
 set info size:time
 set ruler 'df:acc:progress:selection:filter:ind'
+set promptfmt "\033[0m\033[38;5;250m\033[48;5;240m %u \033[48;5;31m\033[38;5;240m\033[38;5;15m\033[48;5;31m %d \033[0m\033[38;5;31m\033[0m\033[38;5;254m %f \033[0m"
 
 # Custom Functions
 cmd open ${{

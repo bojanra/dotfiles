@@ -25,6 +25,12 @@ shopt -s checkwinsize
 
 # use the powerline-go for a fancy prompt
 # https://github.com/justjanne/powerline-go
+# ⇡ or ⇣ -- ahead or behind remote repo
+# ✎ -- a file has been modified, but not staged for commit
+# ✔ -- a file is staged for commit
+# ✼ -- a file has conflicts
+# + -- untracked files are present
+# ⚑ -- stash is present
 function _update_ps1() {
 
   if [ -n "$DEVBOX_PROJECT_ROOT" ]; then
