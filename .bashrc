@@ -116,14 +116,17 @@ alias gls="git ls-tree --full-tree -r --name-only HEAD"
 alias gclean="git clean -nxd"
 
 # devbox zinka shortcut
-alias zinka="cd ~/01_rtv/85_zBox/; devbox run zinka"
+alias zinka="cd ~/01_rtv/85_zBox/; devbox run dev"
+alias cherry="cd ~/02_personal/02_cherry/01_vm/cherryTool/; vsx"
 
 alias diff='colordiff'
 alias path='echo -e ${PATH//:/\\n}'
-alias root="sudo su -"
+alias root="sudo -i"
 alias bigdirs='du --max-depth=1 2> /dev/null | sort -n -r | head -n20'
 alias locate='locate -i'
 alias n=nvim
+
+alias mnt="mount | awk -F' ' '{ printf \"%s\t%s\n\",\$1,\$3; }' | column -t | egrep ^/dev/ | sort"
 
 # bartib - time tracking
 # https://github.com/nikolassv/bartib
@@ -209,3 +212,6 @@ export LF_BOOKMARK_PATH=~/.config/lf/bookmark
 
 # import the OPENAI_API_KEY
 [ -f ~/.openai.env ] && source ~/.openai.env
+
+# opencode
+export PATH=/home/ramsakb/.opencode/bin:$PATH

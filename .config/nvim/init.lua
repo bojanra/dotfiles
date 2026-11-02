@@ -14,6 +14,8 @@ vim.filetype.add({
 
 vim.opt.title = true
 vim.opt.titlestring = [[%f %h%m%r%w %{v:progname} (%{tabpagenr()} of %{tabpagenr('$')})]]
+vim.opt.errorformat = "%*[^[] [%*[^]]] %f:%l:%c %m"
+vim.opt.makeprg = "npm run build"
 
 require("lualine").setup({
   sections = {

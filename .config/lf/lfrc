@@ -60,7 +60,7 @@ cmd on-redraw %{{
     fi
 }}
 
-cmd help ${{
+cmd help_old ${{
     line=$(grep '^# \[' ~/.config/lf/lfrc \
         | sed 's/^# \[\(.*\)\] /\1\t/' \
         | fzf --prompt="lf>" --preview "")
@@ -70,10 +70,18 @@ cmd help ${{
     [ -n "$key" ] && lf -remote "send $id push $key"
 }}
 
-cmd mkdir ${{
+cmd help ${{
+    clear
+    bat ~/.config/lf/cheatsheet
+    printf '\nPress any key to return to lf...'
+    read -rsn1 
+}}
+
+cmd makedir ${{
   printf "Directory Name: "
   read ans
-  mkdir $ans
+  mkdir -p -- "$ans"
+  lf -remote "send $id cd \"$PWD/$ans\""
 }}
 
 cmd mkfile ${{
@@ -103,7 +111,7 @@ cmd sudomkfile ${{
 cmd setwallpaper %cp "$f" ~/.config/wall.png && xwallpaper --zoom "$f"
 
 cmd fzf_jump ${{
-  res="$(find . -maxdepth 4 -not -path "*.git/*" -not -path "*.tidyall*" -not -path "*.npm*" -not -path "*cache*" -not -path "*.mozilla*" -not -path "*.eclipse*" | fzf --reverse --header='Jump to location')"
+  res="$(find . -maxdepth 8 -not -path "*.git/*" -not -path "*.tidyall*" -not -path "*.npm*" -not -path "*cache*" -not -path "*.mozilla*" -not -path "*.eclipse*" | fzf --reverse --header='Jump to location')"
   if [ -f "$res" ]; then
     cmd="select"
   elif [ -d "$res" ]; then
@@ -127,6 +135,7 @@ cmd fzf_search ${{
 cmd unarchive ${{
   case "$f" in
       *.zip) unzip "$f" ;;
+      *.tgz) tar -xzvf "$f" ;;
       *.tar.gz) tar -xzvf "$f" ;;
       *.tar.bz2) tar -xjvf "$f" ;;
       *.tar) tar -xvf "$f" ;;
@@ -449,11 +458,11 @@ map ec $$EDITOR ~/.config/lf/lfrc
 map er reload-config
 map ee $$EDITOR "$f"
 
-# [ol] lazygit
-map ol !lazygit
+# [l] lazygit
+map l !lazygit
 
 # [N] disk usage - ncdu
-map N !ncdu 
+map N !ncdu i
 
 # [n] create new file
 map n :newfile
@@ -487,7 +496,7 @@ map y copy
 # [m] make file, dir...
 map mf mkfile
 map mr sudomkfile
-map md mkdir
+map md makedir
 # [ch] chmod
 map ch chmod
 # [b] bookmark ...
@@ -506,15 +515,17 @@ map + glob-select *
 # [U] unselect
 map U unselect
 # [c-o] go to background
-map <c-o> $ kill -STOP $PPID  # go to background
+map <c-o> $$SHELL
 # [Q] change to current dir and exit
 map Q quit-and-cd
+map <c-d> quit-and-cd
 # [;c] copy path to clipboard
 map \;c $echo "$f" | xclip -selection clipboard && notify-send 'lf' "path to <i>$(basename "$f")</i> copied to clipboard"
 # [cc] open file manager in current directory
 map cc push &xdg-open<space>.<enter>
 # [g] go to ...
 map gD cd ~/Desktop
+map gH cd ~/
 map gC cd ~/03_work/02_cherry/01_vm/cherryTool/
 map gL follow-link
 # [K...] list mappings

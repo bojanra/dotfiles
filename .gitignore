@@ -1,3 +1,6 @@
-
 *.un~
 .~*
+.tidyall.d/
+.opencode
+AGENTS.md
+MYNOTES.md

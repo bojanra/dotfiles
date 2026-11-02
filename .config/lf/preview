@@ -39,7 +39,7 @@ case "$file" in
 *.doc) catdoc "$file" ;;
 *.docx) docx2txt "$file" - ;;
 *.csv) cat "$file" | sed s/,/\\n/g ;;
-*.pdf)
+*.pdf | *.PDF)
   CACHE=$(mktemp /tmp/thumbcache.XXXXX)
   pdftoppm -png -f 1 -singlefile "$file" "$CACHE"
   image "$CACHE.png"
@@ -51,7 +51,7 @@ case "$file" in
   $HOME/.config/lf/image draw "$CACHE" $num 1 $numb $numc
   exit 1
   ;;
-*.bmp | *.jpg | *.jpeg | *.png | *.xpm)
+*.bmp | *.jpg | *.jpeg | *.png | *.xpm | *.webp | *.ico | *.gif)
   image "$file"
   exit 1
   ;;
@@ -65,6 +65,12 @@ case "$file" in
 *.svg)
   CACHE=$(mktemp /tmp/thumbcache.XXXXX.png)
   convert "$file" "$CACHE"
+  image "$CACHE"
+  exit 1
+  ;;
+*.base64)
+  CACHE=$(mktemp /tmp/thumbcache.XXXXX.jpg)
+  base64 -d "$file" >"$CACHE"
   image "$CACHE"
   exit 1
   ;;

@@ -23,12 +23,12 @@ return {
         },
         agents = {
           {
-            name = "ChatGPT3-5",
+            name = "ChatGPT",
             disable = false,
             provider = "openai",
             chat = true,
             command = true,
-            model = { model = "gpt-3.5-turbo" },
+            model = { model = "gpt-6-luna" },
             system_prompt = require("gp.defaults").chat_system_prompt,
           },
           {
@@ -41,8 +41,8 @@ return {
             system_prompt = require("gp.defaults").chat_system_prompt,
           },
         },
-        default_command_agent = "ChatGPT3-5",
-        default_chat_agent = "ChatGPT3-5",
+        default_command_agent = "ChatGPT",
+        default_chat_agent = "ChatGPT",
         cmd_prefix = "Gp",
         curl_params = {},
 
